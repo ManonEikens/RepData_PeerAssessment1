@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 The data for this assignment was downloaded on 06-11-2015 from the Coursera website:
 https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip
@@ -13,13 +8,48 @@ The dataset is stored in a comma-separated-value (CSV) file and there are a tota
 First the data must be loaded.
 Then I take a look at the data to get a better idea.
 
-```{r}
+
+```r
 activity <- read.csv("activity.csv")
 summary(activity)
+```
+
+```
+##      steps                date          interval     
+##  Min.   :  0.00   2012-10-01:  288   Min.   :   0.0  
+##  1st Qu.:  0.00   2012-10-02:  288   1st Qu.: 588.8  
+##  Median :  0.00   2012-10-03:  288   Median :1177.5  
+##  Mean   : 37.38   2012-10-04:  288   Mean   :1177.5  
+##  3rd Qu.: 12.00   2012-10-05:  288   3rd Qu.:1766.2  
+##  Max.   :806.00   2012-10-06:  288   Max.   :2355.0  
+##  NA's   :2304     (Other)   :15840
+```
+
+```r
 head(activity)
+```
+
+```
+##   steps       date interval
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
+## 4    NA 2012-10-01       15
+## 5    NA 2012-10-01       20
+## 6    NA 2012-10-01       25
+```
+
+```r
 plot(activity$date, activity$steps)
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-1-1.png) 
+
+```r
 plot(activity$interval, activity$steps)
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-1-2.png) 
 
 ## What is mean total number of steps taken per day?
 For this part of the assignment, you can ignore the missing values in the dataset.
@@ -29,14 +59,35 @@ In order to calculate the sum, I use the package 'dplyr'.
 First I group the data by date and leave out the missing values.
 Then I get the sum of the steps per date.
 
-```{r}
+
+```r
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+## 
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+## 
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 activitydate <- group_by(na.omit(activity), date)
 activitysum <- summarise(activitydate, sumsteps=sum(steps))
 hist(activitysum$sumsteps,
      main="Histogram of sum of steps per day",
      xlab="sum of steps per day")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+
+```r
 ## alternative with package 'reshape2', I'm still looking for the best or easiest way....
 # library(reshape2)
 # activity2 <- melt(activity, id.vars="date", measure.vars="steps", na.rm=TRUE)
@@ -45,9 +96,21 @@ hist(activitysum$sumsteps,
 
 Calculate and report the mean and median of the total number of steps taken per day.
 
-```{r}
+
+```r
 mean(activitysum$sumsteps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(activitysum$sumsteps)
+```
+
+```
+## [1] 10765
 ```
 
 The mean amount of steps per day is 10766.19
@@ -60,7 +123,8 @@ Again I use the package 'dplyr'.
 First I group the data by interval.
 Then I get the mean of the steps per interval.
 
-```{r}
+
+```r
 activityinterval <- group_by(na.omit(activity), interval)
 activitymean <- summarise(activityinterval, meansteps=mean(steps))
 plot(activitymean$interval, activitymean$meansteps, type="l",
@@ -69,14 +133,26 @@ plot(activitymean$interval, activitymean$meansteps, type="l",
      ylab="average steps")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+
 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
 First I have to find the row with the maximum number of steps.
 Then I have to find the corresponding interval
 
-```{r}
+
+```r
 rowmaxsteps <- which.max(activitymean$meansteps)
 activityinterval[rowmaxsteps,]
+```
+
+```
+## Source: local data frame [1 x 3]
+## Groups: interval [1]
+## 
+##   steps       date interval
+##   (int)     (fctr)    (int)
+## 1     0 2012-10-02      835
 ```
 
 The maximum number of steps is in interval 835
@@ -86,8 +162,13 @@ Note that there are a number of days/intervals where there are missing values (c
 
 Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
-```{r}
+
+```r
 sum(is.na(activity$steps))
+```
+
+```
+## [1] 2304
 ```
 There are 2304 missing values
 
@@ -104,7 +185,8 @@ Third I find the row of that interval in the dataframe activitymean.
 Fourth I select the mean of that interval
 Fifth I replace the missing value with that mean.
 
-```{r}
+
+```r
 activity2 <- activity
 for(i in 1:nrow(activity2)) {
       if(is.na(activity2$steps[i])) {
@@ -118,14 +200,31 @@ for(i in 1:nrow(activity2)) {
 
 Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
-```{r}
+
+```r
 activity2date <- group_by(activity2, date)
 activity2sum <- summarise(activity2date, sumsteps=sum(steps))
 hist(activity2sum$sumsteps,
      main="Histogram of sum of steps per day",
      xlab="sum of steps per day")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
+
+```r
 mean(activity2sum$sumsteps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(activity2sum$sumsteps)
+```
+
+```
+## [1] 10766.19
 ```
 
 Without the missing values:
@@ -151,8 +250,16 @@ Then I make the new variable 'day'.
 Another variable wil be used as 'daytype' which will include 'weekday' and 'weekend'.
 The standard value will be 'weekday'
 
-```{r}
+
+```r
 Sys.setlocale("LC_TIME", "C")
+```
+
+```
+## [1] "C"
+```
+
+```r
 activity2$date <- as.Date(activity2$date)
 activity2$day <- weekdays(activity2$date)
 activity2$daytype <- c("weekday")
@@ -164,7 +271,8 @@ I change the variable 'daytype' to a factor.
 For the plot I need to have the average steps per interval and daytype.
 I use the aggregate-function to do this.
 
-```{r}
+
+```r
 for(i in 1:nrow(activity2)) {
       if (activity2$day[i] == "Saturday" | activity2$day[i] == "Sunday") {
             activity2$daytype[i] <- c("weekend")
@@ -176,7 +284,8 @@ activity2agg <- aggregate(steps ~ interval * daytype, data = activity2, FUN=mean
 
 To make a panel plot I use the package 'ggplot2'
 
-```{r}
+
+```r
 library(ggplot2)
 qplot(interval, steps, data = activity2agg,
       facets = daytype ~ .,
@@ -184,4 +293,6 @@ qplot(interval, steps, data = activity2agg,
       method = "lm",
       main = "Average amount of steps per interval for weekdays and weekends")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-11-1.png) 
 
